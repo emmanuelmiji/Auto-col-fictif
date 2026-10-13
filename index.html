@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Auto-École Volant d'Or à Limete, Kinshasa. Formules permis B, inscription et réservation des heures de conduite en ligne.">
+<title>Auto-École Volant d'Or</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=Archivo+Narrow:wght@600;700&display=swap">
+<style>
+/* Layout: driving-school site (hero, formules, inscription, lesson slot picker) + manager console (inscrits/paiements, planning moniteurs) */
+:root{
+  --bg:#f4f5f7; --surface:#ffffff; --ink:#161a22; --muted:#5d6472; --line:#dcdfe5;
+  --road:#1c2230; --road-ink:#ffffff; --sign:#e0a400; --on-sign:#1a1400; --sign-soft:#fbf1d2; --red:#c8321f;
+  --ok:#1d7448; --ok-soft:#e0f1e7; --warn:#995f00; --warn-soft:#fcefd5; --bad:#b0352c; --bad-soft:#fae3e0; --info:#2457a6; --info-soft:#e2ebf8;
+  --display:"Archivo Narrow", "Arial Narrow", Arial, sans-serif;
+  --body:"Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --surface:#171b24; --ink:#e9ecf2; --muted:#9ca3b1; --line:#2a303d;
+  --road:#222a3b; --road-ink:#ffffff; --sign:#f2bb2a; --on-sign:#1a1400; --sign-soft:#362a0a; --red:#f07a68;
+  --ok:#5ccf8c; --ok-soft:#14321f; --warn:#efb54f; --warn-soft:#382a10; --bad:#f08b80; --bad-soft:#3c1b18; --info:#86adf0; --info-soft:#17284a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --surface:#171b24; --ink:#e9ecf2; --muted:#9ca3b1; --line:#2a303d;
+  --road:#222a3b; --road-ink:#ffffff; --sign:#f2bb2a; --on-sign:#1a1400; --sign-soft:#362a0a; --red:#f07a68;
+  --ok:#5ccf8c; --ok-soft:#14321f; --warn:#efb54f; --warn-soft:#382a10; --bad:#f08b80; --bad-soft:#3c1b18; --info:#86adf0; --info-soft:#17284a; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding-inline:16px}
+h1,h2{font-family:var(--display);font-weight:700;line-height:1.02;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h3{margin:0;text-wrap:balance}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sign);outline-offset:2px}
+
+.demobar{background:var(--ink);color:var(--bg);font-size:13px}
+.demobar .wrap{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding-block:8px}
+.tabs{display:flex;gap:4px;background:color-mix(in srgb,var(--bg) 14%,transparent);padding:3px;border-radius:999px}
+.tabs button{border:0;background:transparent;color:inherit;padding:6px 14px;border-radius:999px;cursor:pointer;font-weight:600}
+.tabs button[aria-selected="true"]{background:var(--sign);color:var(--on-sign)}
+
+.hero{background:var(--road);color:var(--road-ink);padding-block:48px 56px;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:22px;height:6px;
+  background:repeating-linear-gradient(90deg,var(--sign) 0 46px,transparent 46px 84px);opacity:.9}
+.hero .wrap{position:relative;display:grid;gap:14px}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--sign)}
+.eyebrow i{width:16px;height:16px;border:3px solid var(--red);border-radius:50%;background:var(--road-ink);display:inline-block}
+.hero h1{font-size:clamp(2.6rem,8vw,4.6rem);text-transform:uppercase}
+.hero p{max-width:54ch;margin:0;font-size:1.05rem;opacity:.92}
+.hero-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:12px 18px;font-weight:700;cursor:pointer;text-decoration:none}
+.btn-sign{background:var(--sign);color:var(--on-sign)}
+.btn-ghost{background:transparent;color:inherit;box-shadow:inset 0 0 0 1.5px currentColor}
+.facts{display:flex;flex-wrap:wrap;gap:6px 22px;font-size:14px;opacity:.9}
+
+section{padding-block:44px}
+.sec-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:20px}
+.sec-head h2{font-size:clamp(1.9rem,4.6vw,2.6rem);text-transform:uppercase}
+.sec-head span{color:var(--muted);font-size:14px}
+
+.plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px}
+.plan.best{border:2px solid var(--sign)}
+.plan .badge{align-self:flex-start;background:var(--sign);color:var(--on-sign);font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:4px}
+.plan h3{font-family:var(--display);font-size:1.5rem;text-transform:uppercase}
+.plan .price{font-size:1.9rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.plan .price small{font-size:14px;font-weight:500;color:var(--muted)}
+.plan ul{margin:0;padding-left:18px;color:var(--muted);font-size:14px;display:grid;gap:3px}
+.plan button{margin-top:auto;border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}
+
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:32px;align-items:start}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.side p{color:var(--muted);margin:0 0 14px}
+.info-list{display:grid;gap:12px;margin:0;padding:0;list-style:none;font-size:15px}
+.info-list b{display:block;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:grid;gap:14px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:460px){.row{grid-template-columns:1fr}}
+label,.lbl{display:grid;gap:6px;font-size:14px;font-weight:600}
+input,select,textarea{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 12px;font-weight:400}
+.err{color:var(--bad);font-size:14px;margin:0}
+.success{background:var(--ok-soft);border-radius:16px;padding:22px;display:grid;gap:8px}
+.success h3{font-family:var(--display);font-size:1.7rem;color:var(--ok);text-transform:uppercase}
+.success p{margin:0}
+
+.days{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.day{flex:0 0 auto;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:8px 12px;cursor:pointer;text-align:center;line-height:1.2;min-width:64px}
+.day small{display:block;font-size:12px;color:var(--muted);text-transform:capitalize}
+.day b{font-size:1.15rem;font-variant-numeric:tabular-nums}
+.day[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.day[aria-pressed="true"] small{color:inherit;opacity:.8}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.slot{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 6px;font-weight:700;font-variant-numeric:tabular-nums;cursor:pointer;text-align:center}
+.slot:disabled{opacity:.4;cursor:not-allowed;text-decoration:line-through}
+.slot[aria-pressed="true"]{background:var(--sign);color:var(--on-sign);border-color:var(--sign)}
+.legend{font-size:13px;color:var(--muted);margin:0}
+footer{border-top:1px solid var(--line);padding-block:24px;color:var(--muted);font-size:14px}
+
+.admin{padding-block:28px 48px}
+.login{max-width:380px;margin:40px auto}
+.login h2{font-size:2rem;text-transform:uppercase}
+.login p{margin:0;color:var(--muted);font-size:14px}
+.admin-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:18px}
+.admin-top h2{font-size:2.1rem;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:18px}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stat b{display:block;font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15}
+.stat span{font-size:13px;color:var(--muted)}
+.subtabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 15px;font-size:14px;cursor:pointer;font-weight:700}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.list{display:grid;gap:10px}
+.stu{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px 16px;align-items:center}
+@media (max-width:600px){.stu{grid-template-columns:1fr}}
+.stu h3{font-size:1.02rem;font-weight:700;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stu p{margin:2px 0 0;color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.pay{display:grid;gap:6px;min-width:200px}
+.pay-line{display:flex;justify-content:space-between;gap:10px;font-size:14px;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--bg);border-radius:999px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:999px}
+.pay-act{display:flex;gap:6px;flex-wrap:wrap}
+.pay-act input{width:90px;padding:6px 8px;font-size:14px}
+.pill{font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px}
+.p-ok{background:var(--ok-soft);color:var(--ok)}
+.p-warn{background:var(--warn-soft);color:var(--warn)}
+.p-bad{background:var(--bad-soft);color:var(--bad)}
+.p-info{background:var(--info-soft);color:var(--info)}
+.tag-ex{font-size:11px;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:1px 6px;font-weight:500}
+.sm{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 11px;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;color:var(--ink)}
+.sm.ok{background:var(--ok);color:#fff;border-color:var(--ok)}
+.sm.no{color:var(--bad)}
+.plan-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:600px){.plan-grid{grid-template-columns:1fr}}
+.mon{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:8px}
+.mon h3{font-size:1rem;display:flex;justify-content:space-between;gap:8px}
+.mon h3 span{color:var(--muted);font-weight:500;font-size:13px}
+.ls{display:grid;grid-template-columns:56px minmax(0,1fr) auto;gap:8px;align-items:center;padding:8px 10px;border-radius:8px;background:var(--bg);font-size:14px}
+.ls b{font-variant-numeric:tabular-nums}
+.ls.free{color:var(--muted);background:transparent;border:1px dashed var(--line)}
+.ls .nm{min-width:0;overflow-wrap:anywhere}
+.empty{text-align:center;color:var(--muted);padding:32px 16px;border:1px dashed var(--line);border-radius:14px}
+.note{font-size:13px;color:var(--muted);margin-top:18px}
+</style>
+</head>
+<body>
+
+<div class="demobar">
+  <div class="wrap">
+    <span>Démonstration · les données restent sur cet appareil</span>
+    <div class="tabs" role="tablist">
+      <button id="tab-site" role="tab" aria-selected="true">Site élève</button>
+      <button id="tab-admin" role="tab" aria-selected="false">Espace gérant</button>
+    </div>
+  </div>
+</div>
+
+<main id="view-site">
+  <header class="hero">
+    <div class="wrap">
+      <span class="eyebrow"><i></i>Limete · Kinshasa · Permis B</span>
+      <h1>Auto-École Volant d'Or</h1>
+      <p>Code de la route et conduite avec des moniteurs patients, sur voitures manuelles et automatiques. Entraînement sur le boulevard Lumumba et préparation à l'examen.</p>
+      <div class="hero-actions">
+        <a class="btn btn-sign" href="#inscription">S'inscrire</a>
+        <a class="btn btn-ghost" href="#lecons">Réserver une heure de conduite</a>
+      </div>
+      <div class="facts"><span>Lun – Sam · 7h00 – 17h00</span><span>Cours de code le soir</span><span>Paiement en 2 ou 3 fois</span></div>
+    </div>
+  </header>
+
+  <section id="formules">
+    <div class="wrap">
+      <div class="sec-head"><h2>Nos formules</h2><span>Prix en dollars US, paiement cash ou mobile money</span></div>
+      <div class="plans" id="plans"></div>
+    </div>
+  </section>
+
+  <section id="inscription">
+    <div class="wrap two">
+      <div class="side">
+        <div class="sec-head"><h2>Inscription</h2></div>
+        <p>Remplissez le formulaire. Le secrétariat vous rappelle pour fixer votre premier cours et vous expliquer les documents à apporter.</p>
+        <ul class="info-list">
+          <li><b>Adresse</b>Boulevard Lumumba, Limete, Kinshasa</li>
+          <li><b>WhatsApp</b>+243 85 000 0000</li>
+          <li><b>À apporter</b>Pièce d'identité, 2 photos passeport, certificat médical</li>
+        </ul>
+      </div>
+      <div id="ins-box">
+        <form class="card" id="ins-form" novalidate>
+          <div class="row">
+            <label for="i-name">Nom complet<input id="i-name" autocomplete="name" placeholder="Ex. Merveille Tshala"></label>
+            <label for="i-phone">Téléphone / WhatsApp<input id="i-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+243 …"></label>
+          </div>
+          <div class="row">
+            <label for="i-plan">Formule<select id="i-plan"></select></label>
+            <label for="i-box">Boîte de vitesse<select id="i-box"><option>Manuelle</option><option>Automatique</option></select></label>
+          </div>
+          <label for="i-pref">Horaire préféré<select id="i-pref"><option>Matin (7h – 11h)</option><option>Après-midi (12h – 17h)</option><option>Samedi uniquement</option></select></label>
+          <p class="err" id="i-err" hidden></p>
+          <button class="btn btn-sign" type="submit">Envoyer mon inscription</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section id="lecons">
+    <div class="wrap two">
+      <div class="side">
+        <div class="sec-head"><h2>Heures de conduite</h2></div>
+        <p>Déjà inscrit ? Choisissez un jour et une heure libre. Un moniteur disponible vous est attribué automatiquement.</p>
+        <p class="legend">Les créneaux barrés sont déjà pris. Une leçon dure 1 heure.</p>
+      </div>
+      <div id="les-box">
+        <form class="card" id="les-form" novalidate>
+          <div class="lbl">Jour<div class="days" id="days"></div></div>
+          <div class="lbl">Heure<div class="slots" id="slots"></div></div>
+          <div class="row">
+            <label for="l-name">Nom de l'élève<input id="l-name" autocomplete="name" placeholder="Votre nom"></label>
+            <label for="l-phone">Téléphone<input id="l-phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+243 …"></label>
+          </div>
+          <p class="err" id="l-err" hidden></p>
+          <button class="btn btn-sign" type="submit">Réserver cette heure</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer><div class="wrap">Auto-École Volant d'Or · Auto-école fictive créée pour la démonstration</div></footer>
+</main>
+
+<main id="view-admin" hidden>
+  <div class="wrap admin">
+    <form class="card login" id="login" novalidate>
+      <h2>Espace gérant</h2>
+      <p>Accès réservé au secrétariat. Code de la démo : <b>1234</b></p>
+      <label for="pin">Code d'accès<input id="pin" type="password" inputmode="numeric" autocomplete="off"></label>
+      <p class="err" id="pin-err" hidden>Code incorrect. Réessayez.</p>
+      <button class="btn btn-sign" type="submit">Entrer</button>
+    </form>
+
+    <div id="dash" hidden>
+      <div class="admin-top">
+        <h2>Tableau de bord</h2>
+        <button class="sm" id="logout" type="button">Se déconnecter</button>
+      </div>
+      <div class="stats">
+        <div class="stat"><b id="s-stu">0</b><span>élèves inscrits</span></div>
+        <div class="stat"><b id="s-new">0</b><span>nouvelles inscriptions à rappeler</span></div>
+        <div class="stat"><b id="s-les">0</b><span>leçons aujourd'hui</span></div>
+        <div class="stat"><b id="s-due">0 $</b><span>reste à encaisser</span></div>
+      </div>
+      <div class="subtabs" id="subtabs">
+        <button class="chip" data-v="stu" aria-pressed="true">Élèves et paiements</button>
+        <button class="chip" data-v="plan" aria-pressed="false">Planning des moniteurs</button>
+      </div>
+      <div id="panel-stu" class="list"></div>
+      <div id="panel-plan" hidden>
+        <div class="days" id="a-days" style="margin-bottom:12px"></div>
+        <div class="plan-grid" id="a-plan"></div>
+      </div>
+      <p class="note">Dans la version livrée à l'auto-école, les inscriptions et réservations arrivent en direct depuis le site, sur le téléphone du gérant.</p>
+    </div>
+  </div>
+</main>
+
+<script>
+(function(){
+  const KEY="volant-data-v1",AUTH="volant-auth";
+  const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+  const $=id=>document.getElementById(id);
+  const pad=n=>String(n).padStart(2,"0");
+  const iso=d=>d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
+  const today=iso(new Date());
+  const money=n=>n.toLocaleString("fr-FR")+" $";
+  const fmtLong=s=>new Date(s+"T12:00").toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+
+  const PLANS=[
+    {id:"code",name:"Code seul",price:60,items:["Cours de code le soir","Tests blancs illimités","Inscription à l'examen théorique"]},
+    {id:"cond",name:"Conduite 20 h",price:220,items:["20 heures avec moniteur","Pour ceux qui ont déjà le code","Présentation à l'examen pratique"]},
+    {id:"full",name:"Permis complet",price:300,best:true,items:["Code + 20 heures de conduite","Dossier administratif inclus","Paiement en 3 fois possible"]},
+    {id:"hour",name:"Heure en plus",price:15,unit:"/ heure",items:["Pour s'entraîner avant l'examen","Ou reprendre confiance au volant"]}
+  ];
+  const plan=id=>PLANS.find(p=>p.id===id);
+  const MONS=["Papy Lufungula","Jeannette Mbala"];
+  const HOURS=["07:00","08:00","09:00","10:00","11:00","13:00","14:00","15:00","16:00"];
+
+  // next 7 working days (no Sunday)
+  const DAYS=[];{const d=new Date();while(DAYS.length<7){if(d.getDay()!==0)DAYS.push(iso(d));d.setDate(d.getDate()+1)}}
+
+  function seed(){
+    const d0=DAYS[0],d1=DAYS[1],d2=DAYS[2];
+    return{
+      students:[
+        {id:"e1",name:"Grâce Mbuyi",phone:"+243 81 234 5678",plan:"full",box:"Manuelle",pref:"Matin (7h – 11h)",paid:200,status:"active",ex:true},
+        {id:"e2",name:"Christian Ngoy",phone:"+243 99 876 5432",plan:"cond",box:"Automatique",pref:"Après-midi (12h – 17h)",paid:220,status:"active",ex:true},
+        {id:"e3",name:"Nathalie Kapinga",phone:"+243 82 555 1200",plan:"full",box:"Manuelle",pref:"Samedi uniquement",paid:100,status:"active",ex:true},
+        {id:"e4",name:"Joël Mutombo",phone:"+243 97 111 2233",plan:"code",box:"Manuelle",pref:"Matin (7h – 11h)",paid:0,status:"new",ex:true}
+      ],
+      lessons:[
+        {id:"l1",date:d0,time:"08:00",mon:0,name:"Grâce Mbuyi",phone:"+243 81 234 5678",ex:true},
+        {id:"l2",date:d0,time:"10:00",mon:1,name:"Christian Ngoy",phone:"+243 99 876 5432",ex:true},
+        {id:"l3",date:d0,time:"14:00",mon:0,name:"Nathalie Kapinga",phone:"+243 82 555 1200",ex:true},
+        {id:"l4",date:d1,time:"08:00",mon:0,name:"Grâce Mbuyi",phone:"+243 81 234 5678",ex:true},
+        {id:"l5",date:d1,time:"08:00",mon:1,name:"Christian Ngoy",phone:"+243 99 876 5432",ex:true},
+        {id:"l6",date:d2,time:"15:00",mon:1,name:"Nathalie Kapinga",phone:"+243 82 555 1200",ex:true}
+      ]
+    }
+  }
+  let data;try{data=JSON.parse(store.get(KEY))}catch(e){data=null}
+  if(!data||!Array.isArray(data.students)||!Array.isArray(data.lessons))data=seed();
+  const save=()=>store.set(KEY,JSON.stringify(data));
+  const freeMon=(date,time)=>[0,1].find(m=>!data.lessons.some(l=>l.date===date&&l.time===time&&l.mon===m));
+
+  /* Tabs */
+  function show(v){
+    $("view-site").hidden=v!=="site";$("view-admin").hidden=v!=="admin";
+    $("tab-site").setAttribute("aria-selected",v==="site");$("tab-admin").setAttribute("aria-selected",v==="admin");
+    if(v==="admin")renderAdmin();else renderSlots();window.scrollTo(0,0);
+  }
+  $("tab-site").onclick=()=>show("site");$("tab-admin").onclick=()=>show("admin");
+
+  /* Plans */
+  $("plans").innerHTML=PLANS.map(p=>`<article class="plan${p.best?" best":""}">${p.best?'<span class="badge">Le plus choisi</span>':""}
+    <h3>${p.name}</h3><div class="price">${p.price} $ <small>${p.unit||""}</small></div>
+    <ul>${p.items.map(i=>`<li>${i}</li>`).join("")}</ul>
+    <button type="button" data-plan="${p.id}">${p.id==="hour"?"Réserver une heure":"Choisir cette formule"}</button></article>`).join("");
+  $("plans").addEventListener("click",e=>{const b=e.target.closest("button[data-plan]");if(!b)return;
+    if(b.dataset.plan==="hour"){$("lecons").scrollIntoView({behavior:"smooth"});return}
+    $("i-plan").value=b.dataset.plan;$("inscription").scrollIntoView({behavior:"smooth"})});
+  $("i-plan").innerHTML=PLANS.filter(p=>p.id!=="hour").map(p=>`<option value="${p.id}"${p.best?" selected":""}>${p.name} · ${p.price} $</option>`).join("");
+
+  const validPhone=s=>s.replace(/\D/g,"").length>=9;
+  const success=(box,title,lines,phone)=>{
+    box.innerHTML=`<div class="success" role="status"><h3></h3>${lines.map(()=>"<p></p>").join("")}<p>Le secrétariat vous écrit sur WhatsApp au <b></b>.</p><div><button class="btn btn-ghost" type="button">Retour</button></div></div>`;
+    box.querySelector("h3").textContent=title;
+    box.querySelectorAll("p").forEach((p,i)=>{if(i<lines.length)p.textContent=lines[i]});
+    box.querySelector("b").textContent=phone;box.querySelector("button").onclick=()=>location.reload();
+  };
+
+  /* Inscription */
+  $("ins-form").addEventListener("submit",e=>{e.preventDefault();
+    const name=$("i-name").value.trim(),phone=$("i-phone").value.trim(),err=$("i-err");
+    if(name.length<2){err.textContent="Indiquez votre nom.";err.hidden=false;$("i-name").focus();return}
+    if(!validPhone(phone)){err.textContent="Indiquez un numéro de téléphone valide.";err.hidden=false;$("i-phone").focus();return}
+    const s={id:"e"+Date.now(),name,phone,plan:$("i-plan").value,box:$("i-box").value,pref:$("i-pref").value,paid:0,status:"new"};
+    data.students.push(s);save();
+    success($("ins-box"),"Inscription envoyée",[`${name}, formule ${plan(s.plan).name} (${money(plan(s.plan).price)}), boîte ${s.box.toLowerCase()}.`],phone);
+  });
+
+  /* Lesson booking */
+  let selDay=DAYS[0],selTime=null;
+  const dayBtn=(d,sel)=>{const x=new Date(d+"T12:00");return `<button type="button" class="day" data-d="${d}" aria-pressed="${d===sel}"><small>${d===today?"auj.":x.toLocaleDateString("fr-FR",{weekday:"short"})}</small><b>${x.getDate()}</b></button>`};
+  function renderSlots(){
+    $("days").innerHTML=DAYS.map(d=>dayBtn(d,selDay)).join("");
+    const now=new Date(),nowT=pad(now.getHours())+":"+pad(now.getMinutes());
+    $("slots").innerHTML=HOURS.map(t=>{const full=freeMon(selDay,t)===undefined||(selDay===today&&t<=nowT);
+      return `<button type="button" class="slot" data-t="${t}" ${full?"disabled":""} aria-pressed="${t===selTime&&!full}">${t.replace(":","h")}</button>`}).join("");
+  }
+  $("days").addEventListener("click",e=>{const b=e.target.closest(".day");if(!b)return;selDay=b.dataset.d;selTime=null;renderSlots()});
+  $("slots").addEventListener("click",e=>{const b=e.target.closest(".slot");if(!b||b.disabled)return;selTime=b.dataset.t;renderSlots()});
+  renderSlots();
+  $("les-form").addEventListener("submit",e=>{e.preventDefault();
+    const name=$("l-name").value.trim(),phone=$("l-phone").value.trim(),err=$("l-err");
+    const fail=(m,id)=>{err.textContent=m;err.hidden=false;if(id)$(id).focus()};
+    if(!selTime)return fail("Choisissez une heure libre.");
+    const m=freeMon(selDay,selTime);if(m===undefined){renderSlots();return fail("Ce créneau vient d'être pris. Choisissez-en un autre.")}
+    if(name.length<2)return fail("Indiquez votre nom.","l-name");
+    if(!validPhone(phone))return fail("Indiquez un numéro de téléphone valide.","l-phone");
+    data.lessons.push({id:"l"+Date.now(),date:selDay,time:selTime,mon:m,name,phone});save();
+    success($("les-box"),"Heure réservée",[`${fmtLong(selDay)} à ${selTime.replace(":","h")}, avec ${MONS[m]}.`,"Rendez-vous à l'auto-école 10 minutes avant, avec votre carte d'élève."],phone);
+  });
+
+  /* Admin */
+  let authed=store.get(AUTH)==="1",view="stu",aDay=DAYS[0],pendingDelete=null;
+  $("login").addEventListener("submit",e=>{e.preventDefault();
+    if($("pin").value==="1234"){authed=true;store.set(AUTH,"1");$("pin").value="";$("pin-err").hidden=true;renderAdmin()}else $("pin-err").hidden=false});
+  $("logout").onclick=()=>{authed=false;store.del(AUTH);renderAdmin()};
+  $("subtabs").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;view=b.dataset.v;
+    document.querySelectorAll("#subtabs .chip").forEach(c=>c.setAttribute("aria-pressed",c===b));renderAdmin()});
+  $("a-days").addEventListener("click",e=>{const b=e.target.closest(".day");if(!b)return;aDay=b.dataset.d;renderPlan()});
+
+  function renderAdmin(){
+    $("login").hidden=authed;$("dash").hidden=!authed;if(!authed)return;
+    const act=data.students.filter(s=>s.status!=="no");
+    $("s-stu").textContent=act.length;
+    $("s-new").textContent=act.filter(s=>s.status==="new").length;
+    $("s-les").textContent=data.lessons.filter(l=>l.date===today).length;
+    $("s-due").textContent=money(act.reduce((a,s)=>a+Math.max(0,plan(s.plan).price-s.paid),0));
+    $("panel-stu").hidden=view!=="stu";$("panel-plan").hidden=view!=="plan";
+    view==="stu"?renderStudents():renderPlan();
+  }
+  const wa=(phone,text)=>{const a=document.createElement("a");a.className="sm";a.textContent="WhatsApp";a.target="_blank";a.rel="noopener";
+    a.href="https://wa.me/"+phone.replace(/\D/g,"")+"?text="+encodeURIComponent(text);return a};
+
+  function renderStudents(){
+    const box=$("panel-stu");box.innerHTML="";
+    const rows=data.students.slice().sort((a,b)=>(a.status==="new"?0:1)-(b.status==="new"?0:1));
+    if(!rows.length){box.innerHTML=`<div class="empty">Aucun élève pour l'instant. Les inscriptions du site apparaissent ici.</div>`;return}
+    for(const s of rows){
+      const p=plan(s.plan),rest=Math.max(0,p.price-s.paid),pct=Math.min(100,Math.round(s.paid/p.price*100));
+      const st=s.status==="new"?["p-info","Nouvelle inscription"]:s.status==="no"?["p-bad","Abandon"]:rest===0?["p-ok","Soldé"]:["p-warn","Reste "+money(rest)];
+      const el=document.createElement("div");el.className="stu";
+      el.innerHTML=`<div><h3><span class="n"></span><span class="pill ${st[0]}">${st[1]}</span>${s.ex?'<span class="tag-ex">exemple</span>':""}</h3><p class="m"></p><p class="m2"></p></div>
+        <div class="pay"><div class="pay-line"><span>Payé ${money(s.paid)}</span><span>sur ${money(p.price)}</span></div><div class="bar"><i style="width:${pct}%"></i></div><div class="pay-act"></div></div>`;
+      el.querySelector(".n").textContent=s.name;
+      el.querySelector(".m").textContent=`${p.name} · boîte ${s.box.toLowerCase()} · ${s.phone}`;
+      el.querySelector(".m2").textContent=`Préférence : ${s.pref} · ${data.lessons.filter(l=>l.phone===s.phone).length} leçon(s) réservée(s)`;
+      const act=el.querySelector(".pay-act");
+      const btn=(label,cls,fn)=>{const b=document.createElement("button");b.type="button";b.className="sm "+cls;b.textContent=label;b.onclick=fn;act.appendChild(b);return b};
+      if(pendingDelete===s.id){
+        btn("Confirmer la suppression","no",()=>{data.students=data.students.filter(x=>x.id!==s.id);pendingDelete=null;save();renderAdmin()});
+        btn("Garder","",()=>{pendingDelete=null;renderAdmin()});
+      }else{
+        if(s.status==="new")btn("Valider l'inscription","ok",()=>{s.status="active";save();renderAdmin()});
+        if(rest>0&&s.status!=="no"){
+          const inp=document.createElement("input");inp.type="number";inp.min="1";inp.placeholder="Montant $";inp.id="pay-"+s.id;inp.setAttribute("aria-label","Montant reçu pour "+s.name);act.appendChild(inp);
+          btn("Encaisser","",()=>{const v=Math.round(+inp.value);if(!(v>0)){inp.focus();return}s.paid=Math.min(p.price,s.paid+v);if(s.status==="new")s.status="active";save();renderAdmin()});
+        }
+        act.appendChild(wa(s.phone,`Bonjour ${s.name}, ici l'Auto-École Volant d'Or. `+(rest>0?`Il vous reste ${money(rest)} à régler pour votre formule ${p.name}.`:`Merci, votre formule ${p.name} est entièrement réglée.`)));
+        btn("Supprimer","",()=>{pendingDelete=s.id;renderAdmin()});
+      }
+      box.appendChild(el);
+    }
+  }
+  function renderPlan(){
+    $("a-days").innerHTML=DAYS.map(d=>dayBtn(d,aDay)).join("");
+    const g=$("a-plan");g.innerHTML="";
+    MONS.forEach((mName,m)=>{
+      const ls=data.lessons.filter(l=>l.date===aDay&&l.mon===m);
+      const c=document.createElement("div");c.className="mon";
+      c.innerHTML=`<h3>${mName}<span>${ls.length} / ${HOURS.length} heures</span></h3>`;
+      HOURS.forEach(t=>{const l=ls.find(x=>x.time===t);const r=document.createElement("div");r.className="ls"+(l?"":" free");
+        r.innerHTML=`<b>${t.replace(":","h")}</b><span class="nm"></span><span class="ac"></span>`;
+        r.querySelector(".nm").textContent=l?l.name:"Libre";
+        if(l){const x=document.createElement("button");x.type="button";x.className="sm no";x.textContent="Annuler";
+          x.onclick=()=>{data.lessons=data.lessons.filter(y=>y.id!==l.id);save();renderAdmin()};r.querySelector(".ac").appendChild(x)}
+        c.appendChild(r)});
+      g.appendChild(c);
+    });
+  }
+  if(location.hash==="#gerant")show("admin");
+})();
+</script>
+</body>
+</html>
